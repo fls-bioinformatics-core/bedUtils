@@ -1,9 +1,35 @@
+#!/bin/env python
+#
+#     microarraytowig.py: convert microarray data to wiggle format
+#     Copyright (C) University of Manchester 2011 Peter Briggs
+#
+########################################################################
+#
+# microarraytowig.py
+#
+#########################################################################
+
+"""microarraytowig.py
+
+Convert microarray data to wiggle format.
+"""
+
+#######################################################################
+# Import modules
+#######################################################################
+
 import os
 import sys
+
+#######################################################################
+# Main program
+#######################################################################
+
 if __name__ == "__main__":
     # Check command line
     if len(sys.argv) !=3:
-        print "Usage: %s <probeset>.bed <microarray_data>.txt" % (sys.argv[0])
+        print "Usage: %s <probeset>.bed <microarray_data>.txt" % \
+            os.path.basename(sys.argv[0])
         sys.exit(1)
     # Open probeset file and get list of probeset id's
     probeset_ids = []
