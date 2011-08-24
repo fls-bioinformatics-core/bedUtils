@@ -1,8 +1,36 @@
+#!/bin/env python
+#
+#     probeset2bed.py: create BED file from microarray probeset data
+#     Copyright (C) University of Manchester 2011 Peter Briggs
+#
+########################################################################
+#
+# probeset2bed.py
+#
+#########################################################################
+
+"""probeset2bed.py
+
+Create BED file from microarray probeset data.
+"""
+
+#######################################################################
+# Import modules
+#######################################################################
+
+import os
 import sys
+
+#######################################################################
+# Main program
+#######################################################################
+
 if __name__ == "__main__":
+
     # Command line arguments
     if len(sys.argv) != 2:
-        print "Usage: %s <probeset_file>.fa" % sys.argv[0]
+        print "Usage: %s <probeset_file>.fa" % \
+            os.path.basename(sys.argv[0])
         sys.exit(1)
     probeset_file = sys.argv[1]
     ##print "Index: %s" % probeset_file
