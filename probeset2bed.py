@@ -63,7 +63,7 @@ if __name__ == "__main__":
             stop = fields[4].split('=')[1]
             # Write to output file
             fo.write("%s\t%s\t%s\t%s\n" %
-                     (seqname,start,stop,probeset))
+                     (seqname,start,stop,probeset_id))
     fp.close()
     fo.close()
 
