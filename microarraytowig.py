@@ -21,6 +21,7 @@ Convert microarray data to wiggle format.
 import os
 import sys
 import logging
+import bisect
 
 #######################################################################
 # Classes
@@ -53,6 +54,10 @@ class IndexedProbesets:
     Store data via the 'addProbesetData' method, which is effectively
     indexed by probeset id. Data can then be retrieved by specifying a
     probeset id, using the 'getProbesetData' method.
+
+    This uses the bisect module to keep the stored data sorted in order
+    of probe_id and to do quick lookups when retreiving data, which is
+    much more time efficient than using List.index().
     """
     def __init__(self):
         """New empty IndexedProbesets object
@@ -69,8 +74,11 @@ class IndexedProbesets:
           start:    start coordinate
           end:      end coordinate
         """
-        self.__probeset_ids.append(probe_id)
-        self.__probeset_data.append(ProbesetData(probe_id,chrom,start,end))
+        # Find where to insert new id to keep list in sort order
+        i = bisect.bisect(self.__probeset_ids,probe_id)
+        # Insert data
+        self.__probeset_ids.insert(i,probe_id)
+        self.__probeset_data.insert(i,ProbesetData(probe_id,chrom,start,end))
 
     def getProbesetData(self,probe_id):
         """Retrieve data about a probeset given its id
@@ -78,10 +86,10 @@ class IndexedProbesets:
         Returns the ProbesetData object matching the supplied probeset id,
         or None if no matching id is found.
         """
-        try:
-            i = self.__probeset_ids.index(probe_id)
+        i = bisect.bisect_left(self.__probeset_ids,probe_id)
+        if probe_id <= self.__probeset_ids[-1] and self.__probeset_ids[i] == probe_id:
             return self.__probeset_data[i]
-        except ValueError:
+        else:
             # Id not found
             return None
 
