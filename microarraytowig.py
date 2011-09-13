@@ -47,6 +47,49 @@ class ProbesetData:
         self.end = end
         self.id = probe_id
 
+class IndexedProbesets:
+    """Container class for storing and retrieving probeset data.
+
+    Store data via the 'addProbesetData' method, which is effectively
+    indexed by probeset id. Data can then be retrieved by specifying a
+    probeset id, using the 'getProbesetData' method.
+    """
+    def __init__(self):
+        """New empty IndexedProbesets object
+        """
+        self.__probeset_ids = []
+        self.__probeset_data = []
+
+    def addProbesetData(self,probe_id,chrom,start,end):
+        """Add data about a probeset
+
+        Arguments:
+          probe_id: probeset id number
+          chrom:    chromosome
+          start:    start coordinate
+          end:      end coordinate
+        """
+        self.__probeset_ids.append(probe_id)
+        self.__probeset_data.append(ProbesetData(probe_id,chrom,start,end))
+
+    def getProbesetData(self,probe_id):
+        """Retrieve data about a probeset given its id
+
+        Returns the ProbesetData object matching the supplied probeset id,
+        or None if no matching id is found.
+        """
+        try:
+            i = self.__probeset_ids.index(probe_id)
+            return self.__probeset_data[i]
+        except ValueError:
+            # Id not found
+            return None
+
+    def __len__(self):
+        """Implements __len__ build-in
+        """
+        return len(self.__probeset_ids)
+
 #######################################################################
 # Main program
 #######################################################################
@@ -60,18 +103,17 @@ if __name__ == "__main__":
     # Logging format and level
     logging.basicConfig(format='%(levelname)s %(message)s')
     logging.getLogger().setLevel(logging.DEBUG)
+    # Object to store probeset information
+    probesets = IndexedProbesets()
     # Open probeset file and get list of probeset id's
-    probeset_ids = []
-    probeset_data = []
+    ##probeset_ids = []
+    ##probeset_data = []
     fp = open(sys.argv[1],'r')
     for line in fp:
         items = line.strip().split('\t')
-        data = ProbesetData(items[3],items[0],items[1],items[2])
-        probeset_data.append(data)
-        probeset_ids.append(data.id)
+        probesets.addProbesetData(items[3],items[0],items[1],items[2])
     fp.close()
-    logging.debug("Read in %s probeset ids" % len(probeset_ids))
-    logging.debug("Probeset ids (first 20): %s" % probeset_ids[:20])
+    logging.debug("Read in %s probeset ids" % len(probesets))
     # Get microarray file basename
     ma_basename = os.path.splitext(os.path.basename(sys.argv[2]))[0]
     logging.debug("Basename for output files: %s" % ma_basename)
@@ -94,8 +136,7 @@ if __name__ == "__main__":
         files.append(fp)
     # Convenience variable
     nfiles = len(files)
-    # for each line in microarray file
-    # check if the id (first value) is in the probeset list
+    # For each line in microarray file retrieve the data for the matching probeset id
     skipped = 0
     read = 0
     for line in fm:
@@ -104,21 +145,19 @@ if __name__ == "__main__":
         read += 1
         if (read % 10000) == 0:
             print "Read %d" % read
-        try:
-            # Check if this id is in the list of probeset ids
-            # If not then a ValueError is raised 
-            i = probeset_ids.index(probeset_id)
+        # Look up the probeset    
+        probeset = probesets.getProbesetData(probeset_id)
+        if probeset is not None:
             # Add values to appropriate file
             for j in range(nfiles):
-                files[j].write("%s\t%s\t%s\t%s\n" % (probeset_data[i].chrom,
-                                                     probeset_data[i].start,
-                                                     probeset_data[i].end,
+                files[j].write("%s\t%s\t%s\t%s\n" % (probeset.chrom,
+                                                     probeset.start,
+                                                     probeset.end,
                                                      items[j+1]))
-        except ValueError:
+        else:
             # Not found
             logging.warning("Exon data has id not found in probeset data: %s" % probeset_id)
             skipped += 1
-            pass
     # Finished
     logging.debug("Closing files")
     fm.close()
