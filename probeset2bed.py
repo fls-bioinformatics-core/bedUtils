@@ -28,6 +28,9 @@ import logging
 
 if __name__ == "__main__":
 
+    # Configure logging
+    logging.basicConfig(format="%(levelname)s %(message)s")
+
     # Command line arguments
     if len(sys.argv) != 2:
         print "Usage: %s <probeset_file>.fa" % \
