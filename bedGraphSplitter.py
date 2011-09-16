@@ -234,7 +234,22 @@ class TabDataLine:
             or a mixture, and the same column can be referenced
             multiple times.
         """
-        subset = TabFileLine(column_names=self.names)
+        # Set column names for subset
+        subset_column_names = []
+        for key in keys:
+            name = None
+            try:
+                name = self.names[key]
+            except TypeError:
+                # key is not an integer
+                if key in self.names:
+                    name = key
+            if not name:
+                # No matching column for key
+                raise KeyError, "key '%s' not found" % key
+            subset_column_names.append(name)
+        # Construct subset
+        subset = TabDataLine(column_names=subset_column_names)
         for key in keys:
             subset.append(self[key])
         return subset
