@@ -85,12 +85,17 @@ if __name__ == "__main__":
         print
         print "  --fix-chromosome: check and fix chromosome names in output file"
         print "    file (i.e. prepend 'chr' if missing)"
+        print
+        print "  --bedGraph-header=<header>: by default the output bedGraph files"
+        print "    don't have header text; use this option to specify text to use"
+        print "    as the header for each bedGraph"
         sys.exit(1)
 
     # Initialise
     skip_first_line = False
     first_line_is_header = True
     fix_chromosome = False
+    bedgraph_header = None
     user_selected = []
 
     # Arguments
@@ -104,6 +109,8 @@ if __name__ == "__main__":
             first_line_is_header = True
         elif arg == '--fix-chromosome':
             fix_chromosome = True
+        elif arg.startswith('--bedGraph-header='):
+            bedgraph_header = arg.split('=')[1]
         else:
             print "Unrecognised argument: %s" % arg
             sys.exit(1)
@@ -150,18 +157,15 @@ if __name__ == "__main__":
         selected.append(col0)
         # File names
         file_names[col0] = str(output_root+"_"+str(col)+".bedGraph").replace(' ','_')
-
-    # Check for selected columns
-    # Assume that user counts columns starting from 
     
     # Open output files
     out_file = {}
     for col in selected:
         print "%s" % file_names[col]
         out_file[col] = open(file_names[col],'w')
-        # Write initial bedGraph track line
-        out_file[col].write('track type=bedGraph name="%s" description="BedGraph format" ' % col_lookup[col])
-        out_file[col].write('visibility=full color=2,100,0 altColor=0,100,200 priority=20\n')
+        if bedgraph_header is not None:
+            # Write bedGraph header
+            out_file[col].write("%s\n" % bedgraph_header)
 
     # Fix chromosome?
     if fix_chromosome:
