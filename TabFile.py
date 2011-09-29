@@ -205,6 +205,7 @@ class TabDataLine:
         """
         # Data
         self.data = []
+        self.__lineno = None
         if line is not None:
             self.data = line.strip().split('\t')
         # Column names
@@ -215,6 +216,18 @@ class TabDataLine:
             while len(self.data) < len(column_names):
                 self.data.append('')
         # Line number
+        if lineno is not None:
+            invalid_lineno = False
+            try:
+                lineno = int(lineno)
+                if lineno < 0:
+                    # Line number is less than zero
+                    invalid_lineno = True
+            except TypeError:
+                # Can't convert to an integer
+                invalid_lineno = True
+            if invalid_lineno:
+                raise ValueError,"invalid line number '%s'" % lineno
         self.__lineno = lineno
 
     def __getitem__(self,key):
@@ -385,7 +398,19 @@ class TestTabDataLine(unittest.TestCase):
         # Subset with keys
         subset = line.subset("two","three")
         self.assertEqual(len(subset),2,"Subset should have 2 items")
-        self.assertEqual(str(subset),"2.2\t3.3","String representation should be last two columns")        
+        self.assertEqual(str(subset),"2.2\t3.3","String representation should be last two columns")
+
+    def test_line_number(self):
+        """Create new data line with line number
+        """
+        line = TabDataLine(line="test",lineno=3)
+        self.assertEqual(line.lineno(),3,"Line number should be three")
+
+    def test_invalid_line_numbers(self):
+        """Attempt to create new data lines with invalid line numbers
+        """
+        self.assertRaises(ValueError,TabDataLine,lineno=-3)
+        self.assertRaises(ValueError,TabDataLine,lineno="three")
         
 ########################################################################
 #
