@@ -401,6 +401,20 @@ chr2\t1234\t5678\t6.8
         self.assertEqual(matching[0]['chr'],'chr2',"Lookup returned bad match: '%s'" % m)
         # Look for lines with 'bananas' in the chr column
         self.assertEqual(len(tabfile.lookup('chr','bananas')),0)
+
+    def test_get_index_for_line_number(self):
+        """Look up line numbers from a TabFile
+        """
+        tabfile = TabFile('test',self.fp)
+        # Look for an existing line
+        self.assertEqual(tabfile.indexByLineNumber(2),0)
+        self.assertEqual(tabfile[tabfile.indexByLineNumber(2)].lineno(),2)
+        # Look for the first line in the file (the commented header)
+        self.assertRaises(IndexError,tabfile.indexByLineNumber,1)
+        # Look for a generally non-existant line number
+        self.assertRaises(IndexError,tabfile.indexByLineNumber,-12)
+        # Look for a negative line number
+        self.assertRaises(IndexError,tabfile.indexByLineNumber,99)
         
 class TestTabDataLine(unittest.TestCase):
 
