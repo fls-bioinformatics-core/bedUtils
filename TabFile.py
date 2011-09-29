@@ -298,16 +298,36 @@ class TabDataLine:
         for value in values:
             self.data.append(value)
 
+    def appendColumn(self,key,value):
+        """Append keyed values to the data line
+
+        This adds a new value along with a header name (i.e. key)
+        """
+        self.names.append(key)
+        self.data.append(value)
+
     def subset(self,*keys):
         """Return a subset of data items
 
-        This method creates a new TabFileLine instance with a
+        This method creates a new TabDataLine instance with a
         subset of data specified by the 'keys' argument, e.g.
 
             new_line = line.subset(2,1)
 
         returns an instance with only the 2nd and 3rd data values
         in reverse order.
+
+        To access the items in a subset using index notation,
+        use the same keys as those specified when the subset was
+        created. For example, for
+
+            s = line.subset("two","nine")
+
+        use s["two"] and s["nine"] to access the data; while for
+
+            s = line.subset(2,9)
+
+        use s[2] and s[9].
         
         Arguments:
           keys: one or more keys specifying columns to include in
@@ -315,25 +335,9 @@ class TabDataLine:
             or a mixture, and the same column can be referenced
             multiple times.
         """
-        # Set column names for subset
-        name = {}
-        subset_column_names = []
+        subset = TabDataLine()
         for key in keys:
-            name[key] = None
-            try:
-                name[key] = self.names[int(key)]
-            except ValueError:
-                # key is not an integer
-                if key in self.names:
-                    name[key] = key
-            if not name[key]:
-                # No matching column for key
-                raise KeyError, "key '%s' not found" % key
-            subset_column_names.append(name[key])
-        # Construct subset
-        subset = TabDataLine(column_names=subset_column_names)
-        for key in keys:
-            subset[name[key]] = self[key]
+            subset.appendColumn(key,self[key])
         return subset
 
     def lineno(self):
@@ -459,9 +463,23 @@ class TestTabDataLine(unittest.TestCase):
         self.assertEqual(len(subset),2,"Subset should have 2 items")
         self.assertEqual(str(subset),"3.3\t4.4","String representation should be last two columns")
         # Subset with keys
-        subset = line.subset("two","three")
+        subset = line.subset("three","four")
         self.assertEqual(len(subset),2,"Subset should have 2 items")
-        self.assertEqual(str(subset),"2.2\t3.3","String representation should be last two columns")
+        self.assertEqual(str(subset),"3.3\t4.4","String representation should be last two columns")
+        # Check key lookup still works
+        self.assertEqual(subset["three"],str(3.3))
+
+    def test_subsetting_no_header(self):
+        """Create new data line with no header and retrieve subset
+        """
+        input_data = "1.1\t2.2\t3.3\t4.4"
+        line = TabDataLine(line=input_data)
+        # Subset with integer indices
+        subset = line.subset(2,3)
+        self.assertEqual(len(subset),2,"Subset should have 2 items")
+        self.assertEqual(str(subset),"3.3\t4.4","String representation should be last two columns")
+        # Check key lookup
+        self.assertEqual(subset[2],str(3.3))
 
     def test_line_number(self):
         """Create new data line with line number
