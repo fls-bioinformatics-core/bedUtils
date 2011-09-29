@@ -373,10 +373,19 @@ chr2\t1234\t5678\t6.8
         """Create and load new TabFile instance
         """
         tabfile = TabFile('test',self.fp)
-        self.assertEqual(len(tabfile),3,"Input have 3 lines of data")
+        self.assertEqual(len(tabfile),3,"Input has 3 lines of data")
         self.assertEqual(tabfile.header(),[],"Header should be empty")
-        self.assertEqual(str(tabfile[0]),"chr1\t1\t234\t4.6")
+        self.assertEqual(str(tabfile[0]),"chr1\t1\t234\t4.6","Incorrect string representation")
 
+    def test_load_data_with_header(self):
+        """Create and load Tabfile using first line as header
+        """
+        tabfile = TabFile('test',self.fp,first_line_is_header=True)
+        self.assertEqual(len(tabfile),3,"Input has 3 lines of data")
+        self.assertEqual(tabfile.header(),['chr','start','end','data'],"Wrong header")
+        self.assertEqual(str(tabfile[0]),"chr1\t1\t234\t4.6","Incorrect string representation")
+        self.assertEqual(tabfile[2]['chr'],'chr2',"Incorrect data")
+        
 class TestTabDataLine(unittest.TestCase):
 
     def test_new_line_no_data(self):
