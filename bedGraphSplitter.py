@@ -177,6 +177,16 @@ if __name__ == "__main__":
             if not line[0].startswith('chr'):
                 line[0] = 'chr'+line[0]
 
+    # Fix end positions (subtract 1 base)
+    fix_end_position = True
+    if fix_end_position:
+        print "Fixing end positions..."
+        for line in data:
+            try:
+                line[2] = str(int(line[2])-1)
+            except TypeError:
+                logging.warning("Unable to fix end position for L%d" % line.lineno())
+
     # Write to each file
     for line in data:
         for col in selected:
