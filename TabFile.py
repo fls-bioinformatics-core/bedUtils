@@ -384,6 +384,23 @@ chr2\t1234\t5678\t6.8
         self.assertEqual(tabfile.header(),['chr','start','end','data'],"Wrong header")
         self.assertEqual(str(tabfile[0]),"chr1\t1\t234\t4.6","Incorrect string representation")
         self.assertEqual(tabfile[2]['chr'],'chr2',"Incorrect data")
+
+    def test_lookup(self):
+        """Look up data from a TabFile
+        """
+        tabfile = TabFile('test',self.fp,first_line_is_header=True)
+        # Look for lines with 'chr1' in the chr column
+        matching = tabfile.lookup('chr','chr1')
+        self.assertEqual(len(matching),2)
+        for m in matching:
+            self.assertEqual(m['chr'],'chr1',"Lookup returned bad match: '%s'" % m)
+        self.assertNotEqual(matching[0],matching[1])
+        # Look for lines with 'chr2' in the chr column
+        matching = tabfile.lookup('chr','chr2')
+        self.assertEqual(len(matching),1)
+        self.assertEqual(matching[0]['chr'],'chr2',"Lookup returned bad match: '%s'" % m)
+        # Look for lines with 'bananas' in the chr column
+        self.assertEqual(len(tabfile.lookup('chr','bananas')),0)
         
 class TestTabDataLine(unittest.TestCase):
 
