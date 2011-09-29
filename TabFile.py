@@ -52,7 +52,7 @@ class TabFile:
         # Set up column names
         self.__header = []
         if column_names is not None:
-            self.setHeader(column_names)
+            self.__setHeader(column_names)
         # Read in data
         self.__data = []
         if fp is None:
@@ -88,7 +88,7 @@ class TabFile:
                 continue
             elif first_line_is_header:
                 # Set up header from first line
-                self.setHeader(line.strip().strip('#').split('\t'))
+                self.__setHeader(line.strip().strip('#').split('\t'))
                 first_line_is_header = False
                 continue
             if line.lstrip().startswith('#'):
@@ -102,14 +102,13 @@ class TabFile:
                 raise IndexError, "Not enough data items in line"
             self.__data.append(data_line)
 
-    def setHeader(self,column_names):
+    def __setHeader(self,column_names):
         """Set the names for columns of data
-
-        *** Should not be called externally ***
 
         Arguments:
           column_names: a tuple or list with names for each column in order.
         """
+        assert(len(self) == 0)
         if len(self.__header) > 0:
             logging.warning("Overriding existing headers")
             self.__header = []
