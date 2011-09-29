@@ -81,7 +81,7 @@ if __name__ == "__main__":
         print "  --skip-first-line: ignore first line of input file"
         print
         print "  --first-line-is-header: take column names from first line of"
-        print "    input file."
+        print "    input file"
         print
         print "  --fix-chromosome: check and fix chromosome names in output file"
         print "    file (i.e. prepend 'chr' if missing)"
