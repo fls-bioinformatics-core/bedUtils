@@ -173,6 +173,7 @@ if __name__ == "__main__":
 
     # Fix chromosome?
     if fix_chromosome:
+        print "Fixing chromosome names..."
         for line in data:
             if not line[0].startswith('chr'):
                 line[0] = 'chr'+line[0]
@@ -188,6 +189,7 @@ if __name__ == "__main__":
                 logging.warning("Unable to fix end position for L%d" % line.lineno())
 
     # Write to each file
+    print "Writing data..."
     for line in data:
         for col in selected:
             try:
