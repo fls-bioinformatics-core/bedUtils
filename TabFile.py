@@ -96,10 +96,13 @@ class TabFile:
                 continue
             # Store data
             data_line = TabDataLine(line,column_names=self.header(),lineno=line_no)
-            if self.__ncols > 0 and len(data_line) < self.__ncols:
-                # Inconsistent lines are an error
-                logging.error("L%d: fewer data items in line than expected" % line_no)
-                raise IndexError, "Not enough data items in line"
+            if self.__ncols > 0:
+                if len(data_line) != self.__ncols:
+                    # Inconsistent lines are an error
+                    raise IndexError, "wrong number of data items in line %d" % line_no
+            else:
+                # Set number of columns
+                self.__ncols = len(data_line)
             self.__data.append(data_line)
 
     def __setHeader(self,column_names):
@@ -110,7 +113,6 @@ class TabFile:
         """
         assert(len(self) == 0)
         if len(self.__header) > 0:
-            logging.warning("Overriding existing headers")
             self.__header = []
         for name in column_names:
             self.__header.append(name)
@@ -122,7 +124,16 @@ class TabFile:
         If no column names were set then this will be an empty list.
         """
         return self.__header
+    
+    def nColumns(self):
+        """Return the number of columns in the file
 
+        If the file had a header then this will be the number of
+        header columns; otherwise it will be the number of columns
+        found in the first line of data
+        """
+        return self.__ncols
+    
     def lookup(self,key,value):
         """Return lines where the key matches the specified value
         """
@@ -379,6 +390,8 @@ chr2\t1234\t5678\t6.8
         self.assertEqual(len(tabfile),3,"Input has 3 lines of data")
         self.assertEqual(tabfile.header(),[],"Header should be empty")
         self.assertEqual(str(tabfile[0]),"chr1\t1\t234\t4.6","Incorrect string representation")
+        self.assertEqual(tabfile[2][0],'chr2',"Incorrect data")
+        self.assertEqual(tabfile.nColumns(),4)
 
     def test_load_data_with_header(self):
         """Create and load Tabfile using first line as header
@@ -388,6 +401,7 @@ chr2\t1234\t5678\t6.8
         self.assertEqual(tabfile.header(),['chr','start','end','data'],"Wrong header")
         self.assertEqual(str(tabfile[0]),"chr1\t1\t234\t4.6","Incorrect string representation")
         self.assertEqual(tabfile[2]['chr'],'chr2',"Incorrect data")
+        self.assertEqual(tabfile.nColumns(),4)
 
     def test_lookup(self):
         """Look up data from a TabFile
@@ -419,6 +433,29 @@ chr2\t1234\t5678\t6.8
         self.assertRaises(IndexError,tabfile.indexByLineNumber,-12)
         # Look for a negative line number
         self.assertRaises(IndexError,tabfile.indexByLineNumber,99)
+
+class TestBadTabFile(unittest.TestCase):
+    """Test with 'bad' input files
+    """
+
+    def setUp(self):
+        # Make file-like object with "bad" data 
+        self.fp = cStringIO.StringIO(
+"""#chr\tstart\tend\tdata
+chr1\t1\t234
+chr1\t567\t890\t5.7\t4.6
+chr2\t1234\t5678\t6.8
+""")
+    
+    def test_ragged_input_file(self):
+        """Deal with mismatched numbers of items on different lines
+        """
+        self.assertRaises(IndexError,TabFile,'test',self.fp,first_line_is_header=True)
+    
+    def test_ragged_input_file_no_header(self):
+        """Deal with mismatched numbers of items on different lines
+        """
+        self.assertRaises(IndexError,TabFile,'test',self.fp)
         
 class TestTabDataLine(unittest.TestCase):
 
@@ -437,6 +474,14 @@ class TestTabDataLine(unittest.TestCase):
         self.assertEqual(len(line),4,"Line should have 4 items")
         self.assertEqual(str(line),"\t\t\t","String representation should be 3 tabs")
         self.assertEqual(line.lineno(),None,"Line number should not be set")
+
+    def test_new_line_data_no_header(self):
+        """Create new data line with data but no header
+        """
+        input_data = "1.1\t2.2\t3.3\t4.4"
+        line = TabDataLine(line=input_data)
+        self.assertEqual(len(line),4,"Line should have 4 items")
+        self.assertEqual(line[1],str(2.2))
 
     def test_get_and_set_data(self):
         """Create new data line and do get and set operations
