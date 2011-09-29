@@ -347,7 +347,46 @@ class TestTabDataLine(unittest.TestCase):
         """
         line = TabDataLine()
         self.assertEqual(len(line),0,"Line should have zero length")
+        self.assertEqual(str(line),"","String representation should be empty string")
+        self.assertEqual(line.lineno(),None,"Line number should not be set")
 
+    def test_new_line_header_no_data(self):
+        """Create new data line with header but no data
+        """
+        line = TabDataLine(column_names=('one','two','three','four'))
+        self.assertEqual(len(line),4,"Line should have 4 items")
+        self.assertEqual(str(line),"\t\t\t","String representation should be 3 tabs")
+        self.assertEqual(line.lineno(),None,"Line number should not be set")
+
+    def test_get_and_set_data(self):
+        """Create new data line and do get and set operations
+        """
+        input_data = "1.1\t2.2\t3.3\t4.4"
+        line = TabDataLine(line=input_data,column_names=('one','two','three','four'))
+        self.assertEqual(len(line),4,"Line should have 4 items")
+        self.assertEqual(str(line),input_data,"String representation should be same as input")
+        # Test getting
+        self.assertEqual(line[1],str(2.2),"Column 2 data is incorrect")
+        self.assertEqual(line["two"],str(2.2),"Column 2 data is incorrect")
+        # Test setting
+        line["two"] = 4.4
+        self.assertEqual(line[1],4.4,"Column 2 data is incorrect after set operation")
+        self.assertEqual(line["two"],4.4,"Column 2 data is incorrect after set operation")
+        
+    def test_subsetting(self):
+        """Create new data line and retrieve subset
+        """
+        input_data = "1.1\t2.2\t3.3\t4.4"
+        line = TabDataLine(line=input_data,column_names=('one','two','three','four'))
+        # Subset with integer indices
+        subset = line.subset(2,3)
+        self.assertEqual(len(subset),2,"Subset should have 2 items")
+        self.assertEqual(str(subset),"3.3\t4.4","String representation should be last two columns")
+        # Subset with keys
+        subset = line.subset("two","three")
+        self.assertEqual(len(subset),2,"Subset should have 2 items")
+        self.assertEqual(str(subset),"2.2\t3.3","String representation should be last two columns")        
+        
 ########################################################################
 #
 # Main: test runner
