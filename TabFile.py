@@ -207,30 +207,58 @@ class TabDataLine:
         self.__lineno = lineno
 
     def __getitem__(self,key):
+        """Implement value = TabDataLine[key]
+
+        'key' can be the name of a column or an integer index
+        (starting from zero). Column names are checked first.
+
+        WARNING there is potential ambiguity if any column "names"
+        also happen to be integers. 
+        """
+        # See if key is a column name
         try:
-            return self.data[int(key)]
-        except ValueError:
-            # See if key is a column name
-            try:
-                i = self.names.index(key)
-            except ValueError:
-                # Not a column name
-                raise KeyError, "column '%s' not found" % key
-            # Return the data
+            i = self.names.index(key)
             return self.data[i]
+        except ValueError:
+            # Not a column name
+            # See if it's an integer index
+            try:
+                i = int(key)
+            except ValueError:
+                # Not an integer
+                raise KeyError, "column '%s' not found" % key
+            try:
+                return self.data[i]
+            except IndexError:
+                # Integer but out of range
+                raise KeyError, "integer index out of range for '%s'" % key
 
     def __setitem__(self,key,value):
+        """Implement TabDataLine[key] = value
+
+        'key' can be the name of a column or an integer index
+        (starting from zero). Column names are checked first.
+
+        WARNING there is potential ambiguity if any column "names"
+        also happen to be integers. 
+        """
+        # See if key is a column name
         try:
-            self.data[int(key)] = value
-        except ValueError:
-            # Assume key is a column name
-            try:
-                i = self.names.index(key)
-            except ValueError:
-                # Not a column name
-                raise KeyError, "column '%s' not found" % key
-            # Assign the data
+            i = self.names.index(key)
             self.data[i] = value
+        except ValueError:
+            # Not a column name
+            # See if it's an integer index
+            try:
+                i = int(key)
+            except ValueError:
+                # Not an integer
+                raise KeyError, "column '%s' not found" % key
+            try:
+                self.data[i] = value
+            except IndexError:
+                # Integer but out of range
+                raise KeyError, "integer index out of range for '%s'" % key
 
     def __len__(self):
         return len(self.data)
@@ -261,23 +289,24 @@ class TabDataLine:
             multiple times.
         """
         # Set column names for subset
+        name = {}
         subset_column_names = []
         for key in keys:
-            name = None
+            name[key] = None
             try:
-                name = self.names[key]
-            except TypeError:
+                name[key] = self.names[int(key)]
+            except ValueError:
                 # key is not an integer
                 if key in self.names:
-                    name = key
-            if not name:
+                    name[key] = key
+            if not name[key]:
                 # No matching column for key
                 raise KeyError, "key '%s' not found" % key
-            subset_column_names.append(name)
+            subset_column_names.append(name[key])
         # Construct subset
         subset = TabDataLine(column_names=subset_column_names)
         for key in keys:
-            subset.append(self[key])
+            subset[name[key]] = self[key]
         return subset
 
     def lineno(self):
