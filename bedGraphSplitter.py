@@ -75,7 +75,7 @@ if __name__ == "__main__":
         print "Options"
         print
         print "  --select=<i>,[<j>,...]: write new file for each column <i>, <j>"
-        print "    etc. Can either specifiy column numbers (starting from zero),"
+        print "    etc. Can either specifiy column numbers (starting from one),"
         print "    or column names (if --first-line-is-header option is used)"
         print
         print "  --skip-first-line: ignore first line of input file"
@@ -91,14 +91,13 @@ if __name__ == "__main__":
     skip_first_line = False
     first_line_is_header = True
     fix_chromosome = False
-    selected = []
+    user_selected = []
 
     # Arguments
     filen = sys.argv[-1]
     for arg in sys.argv[1:-1]:
         if arg.startswith('--select='):
-            selected = arg.split('=')[1].split(',')
-            print "Selected columns = %s" % ' '.join(selected)
+            user_selected = arg.split('=')[1].split(',')
         elif arg == '--skip-first-line':
             skip_first_line = True
         elif arg == '--first-line-is-header':
@@ -109,28 +108,59 @@ if __name__ == "__main__":
             print "Unrecognised argument: %s" % arg
             sys.exit(1)
 
-    # Selected columns
-    if len(selected) == 0:
-        print "No columns selected for output."
-        sys.exit()
-
     # Get the input data
     data = TabFile(filen,
                    skip_first_line=skip_first_line,
                    first_line_is_header=first_line_is_header)
-    print "Got %d lines" % len(data)
-    print "%s" % data.header()
-    
-    # Output files
+    print "Read in %d lines" % len(data)
+    if first_line_is_header:
+        print "Header:"
+        for col in data.header():
+            print "\t%s" % col
+
+    # Output file
     output_root = os.path.splitext(os.path.basename(filen))[0]
-    output_ext = os.path.splitext(os.path.basename(filen))[1]
+
+    # Selected columns
+    if len(user_selected) == 0:
+        print "No columns selected for output."
+        sys.exit()
+    print "Selected columns = %s" % ' '.join(user_selected)
+    # Assume user counts columns starting from one and adjust to count from zero
+    # Also check that the requested column exists and set up file names based on
+    # user input
+    selected = []
+    col_lookup = {}
+    file_names = {}
+    for col in user_selected:
+        try:
+            col0 = int(col) - 1
+            if col0 >= len(data.header()):
+                logging.error("Unable to find column %s, not enough columns in input file" % col)
+                sys.exit(1)
+        except ValueError:
+            # Not an integer
+            if col not in data.header():
+                logging.error("Unable to find column '%s' in input file" % col)
+                sys.exit(1)
+            col0 = col
+        # Column lookup
+        col_lookup[col0] = col
+        # Adjusted column names
+        selected.append(col0)
+        # File names
+        file_names[col0] = str(output_root+"_"+str(col)+".bedGraph").replace(' ','_')
+
+    # Check for selected columns
+    # Assume that user counts columns starting from 
+    
+    # Open output files
     out_file = {}
     for col in selected:
-        filen_out = str(output_root+"_"+str(col)+".bedGraph").replace(' ','_')
-        print "%s" % filen_out
-        out_file[col] = open(filen_out,'w')
+        print "%s" % file_names[col]
+        out_file[col] = open(file_names[col],'w')
         # Write initial bedGraph track line
-        out_file[col].write('track type=bedGraph name="%s" description="BedGraph format" ' % col)
+        out_file[col].write('track type=bedGraph name="%s" description="BedGraph format" ' % col_lookup[col])
         out_file[col].write('visibility=full color=2,100,0 altColor=0,100,200 priority=20\n')
 
     # Fix chromosome?
@@ -142,7 +172,10 @@ if __name__ == "__main__":
     # Write to each file
     for line in data:
         for col in selected:
-            out_file[col].write("%s\n" % line.subset(0,1,2,col))
+            try:
+                out_file[col].write("%s\n" % line.subset(0,1,2,col))
+            except IndexError:
+                logging.warning("Error outputting data for column '%s'" % col_lookup[col])
 
     # Close output files
     for col in selected:
