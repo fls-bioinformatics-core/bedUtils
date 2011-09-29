@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     # Initialise
     skip_first_line = False
-    first_line_is_header = True
+    first_line_is_header = False
     fix_chromosome = False
     bedgraph_header = None
     user_selected = []
