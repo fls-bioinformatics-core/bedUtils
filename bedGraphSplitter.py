@@ -142,7 +142,7 @@ if __name__ == "__main__":
     for col in user_selected:
         try:
             col0 = int(col) - 1
-            if col0 >= len(data.header()):
+            if col0 >= data.nColumns():
                 logging.error("Unable to find column %s, not enough columns in input file" % col)
                 sys.exit(1)
         except ValueError:
@@ -156,12 +156,16 @@ if __name__ == "__main__":
         # Adjusted column names
         selected.append(col0)
         # File names
-        file_names[col0] = str(output_root+"_"+str(col)+".bedGraph").replace(' ','_')
+        if first_line_is_header:
+            file_names[col0] = str(str(data.header()[col0])+".bedGraph").replace(' ','_')
+        else:
+            file_names[col0] = str(output_root+"_"+str(col)+".bedGraph").replace(' ','_')
     
     # Open output files
     out_file = {}
+    print "Opening output files:"
     for col in selected:
-        print "%s" % file_names[col]
+        print "\t%s" % file_names[col]
         out_file[col] = open(file_names[col],'w')
         if bedgraph_header is not None:
             # Write bedGraph header
