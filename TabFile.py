@@ -30,12 +30,14 @@ class TabFile:
 
         myline = data[0]           # fetch first line of data
     """
-    def __init__(self,filen,column_names=None,skip_first_line=False,
+    def __init__(self,filen,fp=None,column_names=None,skip_first_line=False,
                  first_line_is_header=False):
         """Create a new TabFile object
 
         Arguments:
           filen: name of tab-delimited file to load
+          fp: (optional) a file-like object which data can be loaded
+              from like a file
           column_names: (optional) list of column names to assign to
               columns in the file
           skip_first_line: (optional) if True then ignore the first
@@ -53,13 +55,16 @@ class TabFile:
             self.setHeader(column_names)
         # Read in data
         self.__data = []
-        self.load(skip_first_line=skip_first_line,
+        if fp is None:
+            # Open named file
+            fp = open(self.__filen,'rU')
+        self.__load(fp,skip_first_line=skip_first_line,
                   first_line_is_header=first_line_is_header)
+        if fp:
+            fp.close()
 
-    def load(self,skip_first_line=False,first_line_is_header=False):
+    def __load(self,fp,skip_first_line=False,first_line_is_header=False):
         """Load data into the object from file
-
-        *** Should not be called externally ***
 
         Lines starting with '#' are ignored (unless the first_line_is_header
         is set and the first line starts with '#').
@@ -68,13 +73,13 @@ class TabFile:
         items raise an IndexError exception.
 
         Arguments:
+          fp: file-like object to read data from
           skip_first_line: (optional) if True then ignore the first
               line of the input file
           first_line_is_header: (optional) if True then take column
               names from the first line of the file
         """
         line_no = 0
-        fp = open(self.__filen,'rU')
         for line in fp:
             line_no += 1
             if skip_first_line:
@@ -96,7 +101,6 @@ class TabFile:
                 logging.error("L%d: fewer data items in line than expected" % line_no)
                 raise IndexError, "Not enough data items in line"
             self.__data.append(data_line)
-        fp.close()
 
     def setHeader(self,column_names):
         """Set the names for columns of data
@@ -352,6 +356,26 @@ class TabDataLine:
 #########################################################################
 
 import unittest
+import cStringIO
+
+class TestTabFile(unittest.TestCase):
+
+    def setUp(self):
+        # Make file-like object to read data in
+        self.fp = cStringIO.StringIO(
+"""#chr\tstart\tend\tdata
+chr1\t1\t234\t4.6
+chr1\t567\t890\t5.7
+chr2\t1234\t5678\t6.8
+""")
+
+    def test_load_data(self):
+        """Create and load new TabFile instance
+        """
+        tabfile = TabFile('test',self.fp)
+        self.assertEqual(len(tabfile),3,"Input have 3 lines of data")
+        self.assertEqual(tabfile.header(),[],"Header should be empty")
+        self.assertEqual(str(tabfile[0]),"chr1\t1\t234\t4.6")
 
 class TestTabDataLine(unittest.TestCase):
 
