@@ -1,3 +1,14 @@
+#!/bin/env python
+#
+#     TabFile.py: classes for reading and manipulating tab-delimited data
+#     Copyright (C) University of Manchester 2011 Peter Briggs
+#
+########################################################################
+#
+# TabFile.py
+#
+#########################################################################
+
 class TabFile:
     """Class to get data from a tab-delimited file
 
@@ -201,8 +212,8 @@ class TabDataLine:
         if column_names:
             for name in column_names:
                 self.names.append(name)
-        while len(self.data) < len(column_names):
-            self.data.append('')
+            while len(self.data) < len(column_names):
+                self.data.append('')
         # Line number
         self.__lineno = lineno
 
@@ -320,3 +331,28 @@ class TabDataLine:
 
     def __repr__(self):
         return '\t'.join(self.data)
+
+########################################################################
+#
+# Tests
+#
+#########################################################################
+
+import unittest
+
+class TestTabDataLine(unittest.TestCase):
+
+    def test_new_line_no_data(self):
+        """Create new data line with no data
+        """
+        line = TabDataLine()
+        self.assertEqual(len(line),0,"Line should have zero length")
+
+########################################################################
+#
+# Main: test runner
+#
+#########################################################################
+if __name__ == "__main__":
+    # Run tests
+    unittest.main()
