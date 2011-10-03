@@ -88,6 +88,7 @@ if __name__ == "__main__":
         sys.exit()
 
     # Internal flags
+    fix_chromosome_name = True
     correct_stop_position = True
 
     # Input file
@@ -110,6 +111,12 @@ if __name__ == "__main__":
                 not data[0]['stop'].isdigit():
             print "First line of input file doesn't look like data, removing"
             del(data[0])
+
+    # Fix chromosome name
+    if fix_chromosome_name:
+        print "Prepending 'chr' to chromosome names"
+        for line in data:
+            line['chr'] = 'chr' + line['chr']
 
     # Subtract one from end position
     if correct_stop_position:
@@ -137,8 +144,6 @@ if __name__ == "__main__":
         if str(line).strip() == '':
             print "No data items on line %d, ignoring" % line.lineno()
             continue
-        # Fix chromosome
-        line['chr'] = 'chr' + line['chr']
         # Construct computed values
         name = "%s_fc%s" % (line['transcript'],line['fold_change'])
         try:
