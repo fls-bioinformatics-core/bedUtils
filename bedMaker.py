@@ -40,6 +40,8 @@ The output BED file will have columns:
 'stop'
 'RGB'
 
+'stop' is the 'stop' position in the input minus one base.
+
 'name' is constructed as '<transcript>_fc<fold_change>'
 
 RGB values are set based on the P value of the line:
@@ -85,6 +87,9 @@ if __name__ == "__main__":
         print "Usage: %s <input_file>" % os.path.basename(sys.argv[0])
         sys.exit()
 
+    # Internal flags
+    correct_stop_position = True
+
     # Input file
     infile = sys.argv[1]
 
@@ -105,6 +110,18 @@ if __name__ == "__main__":
                 not data[0]['stop'].isdigit():
             print "First line doesn't look like data, removing"
             del(data[0])
+
+    # Subtract one from end position
+    if correct_stop_position:
+        print "Correcting 'stop' position by subtracting one base"
+        for line in data:
+            try:
+                stop = int(line['stop'])
+                line['stop'] = str(stop - 1)
+            except ValueError:
+                print "Error: couldn't convert stop to float (line %d): '%s'" % \
+                    (line.lineno(),line['stop'])
+                sys.exit(1)
 
     # Create new (empty) tabfile for output
     fo = open(outfile,'w')
