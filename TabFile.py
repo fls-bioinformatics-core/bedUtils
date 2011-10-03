@@ -434,6 +434,37 @@ chr2\t1234\t5678\t6.8
         # Look for a negative line number
         self.assertRaises(IndexError,tabfile.indexByLineNumber,99)
 
+class TestUncommentedHeaderTabFile(unittest.TestCase):
+
+    def setUp(self):
+        # Make file-like object to read data in
+        self.fp = cStringIO.StringIO(
+"""chr\tstart\tend\tdata
+chr1\t1\t234\t4.6
+chr1\t567\t890\t5.7
+chr2\t1234\t5678\t6.8
+""")
+
+    def test_expected_uncommented_header(self):
+        """Test reading in a tab file with an expected uncommented header
+        """
+        tabfile = TabFile('test',self.fp,first_line_is_header=True)
+        self.assertEqual(len(tabfile),3,"Input has 3 lines of data")
+        self.assertEqual(tabfile.header(),['chr','start','end','data'],"Wrong header")
+        self.assertEqual(str(tabfile[0]),"chr1\t1\t234\t4.6","Incorrect string representation")
+        self.assertEqual(tabfile[2]['chr'],'chr2',"Incorrect data")
+        self.assertEqual(tabfile.nColumns(),4)
+
+    def test_unexpected_uncommented_header(self):
+        """Test reading in a tab file with an unexpected uncommented header
+        """
+        tabfile = TabFile('test',self.fp)
+        self.assertEqual(len(tabfile),4,"Input has 4 lines of data")
+        self.assertEqual(tabfile.header(),[],"Wrong header")
+        self.assertEqual(str(tabfile[0]),"chr\tstart\tend\tdata","Incorrect string representation")
+        self.assertRaises(KeyError,tabfile[3].__getitem__,'chr')
+        self.assertEqual(tabfile.nColumns(),4)
+        
 class TestBadTabFile(unittest.TestCase):
     """Test with 'bad' input files
     """
