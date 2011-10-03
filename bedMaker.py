@@ -123,7 +123,12 @@ if __name__ == "__main__":
         line['chr'] = 'chr' + line['chr']
         # Construct computed values
         name = "%s_fc%s" % (line['transcript'],line['fold_change'])
-        p_value = line['p_value']
+        try:
+            p_value = float(line['p_value'])
+        except ValueError:
+            print "Error: couldn't convert p-value to float (line %d): '%s'" % \
+                (line.lineno(),line['p_value'])
+            sys.exit(1)
         if p_value < 0.001:
             RGB = '255,0,0'
         elif p_value < 0.05:
