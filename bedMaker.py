@@ -108,7 +108,7 @@ if __name__ == "__main__":
     if len(data) > 0:
         if not data[0]['start'].isdigit() or \
                 not data[0]['stop'].isdigit():
-            print "First line doesn't look like data, removing"
+            print "First line of input file doesn't look like data, removing"
             del(data[0])
 
     # Subtract one from end position
@@ -131,6 +131,7 @@ if __name__ == "__main__":
              (track_name,track_description))
 
     # Write out lines to BED
+    print "Writing data to BED file"
     for line in data:
         # Check there's data
         if str(line).strip() == '':
@@ -164,3 +165,4 @@ if __name__ == "__main__":
                                      RGB)))
     # Finished, close file
     fo.close()
+    print "Finished"
