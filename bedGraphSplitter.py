@@ -1,6 +1,6 @@
 #!/bin/env python
 #
-#     microarraytowig.py: convert microarray data to wiggle format
+#     bedGraphSplitter.py: split data file into multiple files by column
 #     Copyright (C) University of Manchester 2011 Peter Briggs
 #
 ########################################################################
