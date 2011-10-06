@@ -116,17 +116,16 @@ if __name__ == "__main__":
     if fix_chromosome_name:
         print "Prepending 'chr' to chromosome names"
         for line in data:
-            line['chr'] = 'chr' + line['chr']
+            line['chr'] = 'chr' + str(line['chr'])
 
     # Subtract one from end position
     if correct_stop_position:
         print "Correcting 'stop' position by subtracting one base"
         for line in data:
             try:
-                stop = int(line['stop'])
-                line['stop'] = str(stop - 1)
-            except ValueError:
-                print "Error: couldn't convert stop to float (line %d): '%s'" % \
+                line['stop'] = line['stop'] - 1
+            except TypeError:
+                print "Error: 'stop' value at line %d doesn't seem to be a number: '%s'" % \
                     (line.lineno(),line['stop'])
                 sys.exit(1)
 
@@ -147,26 +146,20 @@ if __name__ == "__main__":
         # Construct computed values
         name = "%s_fc%s" % (line['transcript'],line['fold_change'])
         try:
-            p_value = float(line['p_value'])
+            float(line['p_value'])
         except ValueError:
-            print "Error: couldn't convert p-value to float (line %d): '%s'" % \
+            print "Error: 'p-value' at line %d doesn't seem to be a number: '%s'" % \
                 (line.lineno(),line['p_value'])
             sys.exit(1)
-        if p_value < 0.001:
+        if line['p_value'] < 0.001:
             RGB = '255,0,0'
-        elif p_value < 0.05:
+        elif line['p_value'] < 0.05:
             RGB = '205,0,0'
         else:
             RGB = '139,0,0'
         # Write out the line
-        fo.write("%s\n" % '\t'.join((line['chr'],
-                                     line['start'],
-                                     line['stop'],
-                                     name,
-                                     line['p_value'],
-                                     line['strand'],
-                                     line['start'],
-                                     line['stop'],
+        fo.write("%s\n" % '\t'.join((str(line.subset('chr','start','stop')),name,
+                                     str(line.subset('p_value','strand','start','stop')),
                                      RGB)))
     # Finished, close file
     fo.close()
