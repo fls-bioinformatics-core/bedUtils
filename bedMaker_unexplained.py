@@ -9,7 +9,7 @@
 #
 #########################################################################
 
-"""bedMaker.py
+"""bedMaker_unexplained.py
 
 Create BED format file from tab-delimited input file.
 
@@ -18,13 +18,12 @@ http://genome.ucsc.edu/FAQ/FAQformat.html#format1
 
 The input file must have the following columns:
 
-'chromosome'
-'start'
-'stop'
-'strand'
-'transcript'
-'fold change'
-'P value'
+'Chromosome'
+'Start'
+'Stop'
+'Sample ID'
+'Length'
+'Average Coverage'
 
 Additional columns can be present but will be ignored.
 
@@ -34,7 +33,7 @@ The output BED file will have columns:
 'start'
 'stop'
 'name'
-'P value'
+'score'
 'strand'
 'start'
 'stop'
@@ -42,13 +41,15 @@ The output BED file will have columns:
 
 'stop' is the 'stop' position in the input minus one base.
 
-'name' is constructed as '<transcript>_fc<fold_change>'
+'name' is constructed as '<sample_id>_<length>bp'
 
-RGB values are set based on the P value of the line:
+'score' is the integer value of 'average coverage', with values over
+1000 set to 1000.
 
-  p < 0.001 => 255,0,0
-  p < 0.05  => 205,0,0
-  p >= 0.05 => 139,0,0
+RGB values are set based on the average coverage and length:
+
+  average_coverage and length > 300 => -0,0,255
+  else => 139,0,0
 
 """
 
