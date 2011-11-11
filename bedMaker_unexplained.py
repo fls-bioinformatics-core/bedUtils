@@ -60,8 +60,7 @@ RGB values are set based on the average coverage and length:
 import os
 import sys
 import logging
-
-from bedMaker import BedMaker,prependChromosomeName,adjustStopPosition
+from bedMakerUtils import BedMaker,prependChromosomeName,adjustStopPosition
 
 # Set default logging level and output
 logging.basicConfig(format='%(levelname)s: %(message)s')
@@ -77,6 +76,11 @@ logging.basicConfig(format='%(levelname)s: %(message)s')
 #######################################################################
 
 def computeRGBUnexplained(length,average_coverage):
+    """Set the RGB value for the 'unexplained' output
+
+    The RGB colour value is based on the length and average coverage
+    values.
+    """
     if length > 300 and average_coverage > 300:
         RGB = '0,0,255'
     else:
