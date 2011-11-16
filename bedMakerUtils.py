@@ -1,11 +1,11 @@
 #!/bin/env python
 #
-#     bedMaker.py: create BED file from tab-delimited data file
+#     bedMakerUtils.py: utilities for creating BED files from tabbed data
 #     Copyright (C) University of Manchester 2011 Peter Briggs
 #
 ########################################################################
 #
-# bedMaker.py
+# bedMakerUtils.py
 #
 #########################################################################
 
