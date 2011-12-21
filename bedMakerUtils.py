@@ -41,6 +41,8 @@ There are also two convenience functions:
 import os
 import sys
 import logging
+import version
+__version__ = version.__version__
 
 # Set up for local modules in "share"
 SHARE_DIR = os.path.abspath(

@@ -61,6 +61,8 @@ import os
 import sys
 import logging
 from bedMakerUtils import BedMaker,prependChromosomeName,adjustStopPosition
+import version
+__version__ = version.__version__
 
 # Set default logging level and output
 logging.basicConfig(format='%(levelname)s: %(message)s')

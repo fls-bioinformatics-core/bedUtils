@@ -60,6 +60,8 @@ import os
 import sys
 import logging
 from bedMakerUtils import BedMaker,prependChromosomeName,adjustStopPosition
+import version
+__version__ = version.__version__
 
 # Set default logging level and output
 logging.basicConfig(format='%(levelname)s: %(message)s')
@@ -91,10 +93,14 @@ def computeRGB(p_value):
 
 if __name__ == "__main__":
 
+    print "Version: %s" % __version__
+
     # Command line
     if len(sys.argv) != 2:
         print "Usage: %s <input_file>" % os.path.basename(sys.argv[0])
         sys.exit()
+
+    print "Version: %s" % __version__
 
     # Internal flags
     fix_chromosome_name = True

@@ -39,6 +39,8 @@ SHARE_DIR = os.path.abspath(
         os.path.join(os.path.dirname(sys.argv[0]),'..','share')))
 sys.path.append(SHARE_DIR)
 from TabFile import TabFile
+import version
+__version__ = version.__version__
 
 # Set default logging level and output
 logging.basicConfig(format='%(levelname)s: %(message)s')
