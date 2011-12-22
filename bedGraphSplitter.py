@@ -158,7 +158,7 @@ if __name__ == "__main__":
             if col not in data.header():
                 logging.error("Unable to find column '%s' in input file" % col)
                 sys.exit(1)
-            col0 = col
+            col0 = data.header().index(col)
         # Column lookup
         col_lookup[col0] = col
         # Adjusted column names
