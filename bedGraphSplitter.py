@@ -118,7 +118,8 @@ if __name__ == "__main__":
         elif arg == '--fix-chromosome':
             fix_chromosome = True
         elif arg.startswith('--bedGraph-header='):
-            bedgraph_header = arg.split('=')[1]
+            i = arg.index('=')
+            bedgraph_header = arg[i+1:]
         else:
             print "Unrecognised argument: %s" % arg
             sys.exit(1)
