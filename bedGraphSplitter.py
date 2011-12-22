@@ -183,8 +183,8 @@ if __name__ == "__main__":
     if fix_chromosome:
         print "Fixing chromosome names..."
         for line in data:
-            if not line[0].startswith('chr'):
-                line[0] = 'chr'+line[0]
+            if not str(line[0]).startswith('chr'):
+                line[0] = 'chr'+str(line[0])
 
     # Fix end positions (subtract 1 base)
     fix_end_position = True
