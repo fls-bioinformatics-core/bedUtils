@@ -94,6 +94,13 @@ class BedMaker(TabFile):
                     not self[0]['stop'].isdigit():
                 print "First line of input file doesn't look like data, removing"
                 del(self[0])
+        # Remove blank lines
+        i = 0
+        while i < len(self):
+            if not str(self[i]).strip():
+                del(self[i])
+            else:
+                i += 1
 
     def makeBedFile(self,bedout,name,description,column_names):
         """Write the data as a BED format file
