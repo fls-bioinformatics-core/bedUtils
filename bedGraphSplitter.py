@@ -32,6 +32,7 @@ column.
 import os
 import sys
 import logging
+import optparse
 
 # Set up for local modules in "share"
 SHARE_DIR = os.path.abspath(
@@ -57,72 +58,53 @@ logging.basicConfig(format='%(levelname)s: %(message)s')
 
 if __name__ == "__main__":
 
-    # Command line
-    if len(sys.argv) < 2:
-        print "Usage: %s [OPTIONS] <file>" % os.path.basename(sys.argv[0])
-        print
-        print "Generate bedGraph custom track files for display in UCSC browser from"
-        print "genomic data taken from tab-delimited file."
-        print
-        print "<file> must have chromosome, start and end as the first three columns of"
-        print "data. Use the --select option to pick one or more columns of data, each of"
-        print "which will be output to a bedGraph format file, e.g."
-        print
-        print "\t%s --select=4,6,7 input.txt" % os.path.basename(sys.argv[0])
-        print
-        print "will create 3 bedGraph files with data from columns 4, 6 and 7 of the"
-        print "input file."
-        print 
-        print "If the input file has column names in the first line then use the"
-        print "--first-line-is-header option and use the column names in the --select"
-        print "option, e.g."
-        print
-        print "\t%s --first-line-is-header --select='data 1','data 2' input.txt" \
-            % os.path.basename(sys.argv[0])
-        print
-        print "Options"
-        print
-        print "  --select=<i>,[<j>,...]: write new file for each column <i>, <j>"
-        print "    etc. Can either specifiy column numbers (starting from one),"
-        print "    or column names (if --first-line-is-header option is used)"
-        print
-        print "  --skip-first-line: ignore first line of input file"
-        print
-        print "  --first-line-is-header: take column names from first line of"
-        print "    input file"
-        print
-        print "  --fix-chromosome: check and fix chromosome names in output file"
-        print "    file (i.e. prepend 'chr' if missing)"
-        print
-        print "  --bedGraph-header=<header>: by default the output bedGraph files"
-        print "    don't have header text; use this option to specify text to use"
-        print "    as the header for each bedGraph"
+    p = optparse.OptionParser(usage="%prog [options] <file>",
+                              version="%prog "+__version__,
+                              description=
+                              "Generate bedGraph custom track files for display in UCSC "
+                              "browser from genomic data taken from tab-delimited file"
+                              "containing chromosome, start and end as the first three "
+                              "columns of data. Use the --select option to pick one or more "
+                              "columns, each of which will be output to a bedGraph format "
+                              "file.")
+
+    p.add_option('--select',action='store',dest='selection',default=None,
+                 help="specify columns from input file as one or more column indices "
+                 "(i.e. where 1 is the first column) or column names (if "
+                 "--first-line-is-header is used). If multiple columns are selected "
+                 "then separate them by commas, e.g. '4,6,7'. A bedGraph file will "
+                 "be output for each of the selected columns specified.")
+    p.add_option('--skip-first-line',action="store_true",dest="skip_first_line",
+                 help="skip first line of input file")
+    p.add_option('--first-line-is-header',action="store_true",dest="first_line_is_header",
+                 help="take column names from first line of input file")
+    p.add_option('--fix-chromosome',action="store_true",dest="fix_chromosome",
+                 help="fix chromosome names in output file file, by prepending 'chr' "
+                 "if missing in the input")
+    p.add_option('--bedGraph-header',action="store",dest="header",default=None,
+                 help="specify text to use as the header for each output bedGraph "
+                 "(default is not to write a header)")
+
+    # Process the command line
+    options,arguments = p.parse_args()
+
+    # Input file
+    if len(arguments) != 1:
+        p.error("No input file supplied")
+    filen = arguments[0]
+    if not os.path.exists(filen):
+        logging.error("Input file '%s' not found" % filen)
         sys.exit(1)
 
-    # Initialise
-    skip_first_line = False
-    first_line_is_header = False
-    fix_chromosome = False
-    bedgraph_header = None
-    user_selected = []
+    # Report version
+    p.print_version()
 
-    # Arguments
-    filen = sys.argv[-1]
-    for arg in sys.argv[1:-1]:
-        if arg.startswith('--select='):
-            user_selected = arg.split('=')[1].split(',')
-        elif arg == '--skip-first-line':
-            skip_first_line = True
-        elif arg == '--first-line-is-header':
-            first_line_is_header = True
-        elif arg == '--fix-chromosome':
-            fix_chromosome = True
-        elif arg.startswith('--bedGraph-header='):
-            i = arg.index('=')
-            bedgraph_header = arg[i+1:]
-        else:
-            print "Unrecognised argument: %s" % arg
-            sys.exit(1)
+    # Initialise
+    skip_first_line = options.skip_first_line
+    first_line_is_header = options.first_line_is_header
+    fix_chromosome = options.fix_chromosome
+    bedgraph_header = options.header
+    user_selected = str(options.selection).split(',')
 
     # Get the input data
     data = TabFile(filen,
