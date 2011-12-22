@@ -59,6 +59,7 @@ RGB values are set based on the P value of the line:
 import os
 import sys
 import logging
+import optparse
 from bedMakerUtils import BedMaker,prependChromosomeName,adjustStopPosition
 import version
 __version__ = version.__version__
@@ -93,21 +94,30 @@ def computeRGB(p_value):
 
 if __name__ == "__main__":
 
-    print "Version: %s" % __version__
+    p = optparse.OptionParser(usage="%prog <input_file>",
+                              version="%prog "+__version__,
+                              description=
+                              "Create a BED format file from an input tab file with columns "
+                              "representing chr, start, stop, strand, transcript name, "
+                              "fold_change, and p_value.")
 
-    # Command line
-    if len(sys.argv) != 2:
-        print "Usage: %s <input_file>" % os.path.basename(sys.argv[0])
-        sys.exit()
+    # Process the command line
+    options,arguments = p.parse_args()
+    if len(arguments) != 1:
+        p.error("No input file supplied")
 
-    print "Version: %s" % __version__
+    # Input file
+    infile = arguments[0]
+    if not os.path.exists(infile):
+        logging.error("Input file '%s' not found" % infile)
+        sys.exit(1)
+
+    # Report version
+    p.print_version()
 
     # Internal flags
     fix_chromosome_name = True
     correct_stop_position = True
-
-    # Input file
-    infile = sys.argv[1]
 
     # Track name, description and output file name
     track_name = os.path.splitext(os.path.basename(infile))[0]
