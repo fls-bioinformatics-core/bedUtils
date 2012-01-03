@@ -131,7 +131,7 @@ if __name__ == "__main__":
     
     # Fix chromosome name
     if fix_chromosome_name:
-        print "Prepending 'chr' to chromosome names"
+        print "Prepending 'chr' to chromosome names where it's missing"
         prependChromosomeName(data,'chr')
 
     # Subtract one from end position

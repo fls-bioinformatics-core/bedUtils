@@ -118,7 +118,7 @@ if __name__ == "__main__":
     p.print_version()
 
     # Internal flags
-    fix_chromosome_name = False
+    fix_chromosome_name = True
     correct_stop_position = True
 
     # Track name, description and output file name
@@ -133,7 +133,7 @@ if __name__ == "__main__":
     
     # Fix chromosome name
     if fix_chromosome_name:
-        print "Prepending 'chr' to chromosome names"
+        print "Prepending 'chr' to chromosome names where it's missing"
         prependChromosomeName(data,'chr')
 
     # Subtract one from end position

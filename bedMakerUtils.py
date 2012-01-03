@@ -145,7 +145,9 @@ def prependChromosomeName(tabfile,prefix):
     object with the supplied string.
     """
     prefix_str = str(prefix)
-    tabfile.transformColumn('chr',lambda chrom: prefix_str + str(chrom))
+    for data in tabfile:
+        if not str(data['chr']).startswith('chr'):
+            data['chr'] = prefix_str + str(data['chr'])
 
 def adjustStopPosition(tabfile):
     """Adjust the stop positions in a TabFile
