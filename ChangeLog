@@ -1,0 +1,5 @@
+2012-01-03  Peter Briggs  <peter.briggs@manchester.ac.uk>
+
+	* Version 0.1.3: bedMaker and bedMaker_unexplained: don't prepend 'chr' to chromosome names
+	  that already start with 'chr'.
+
